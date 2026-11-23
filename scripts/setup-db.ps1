@@ -1,7 +1,4 @@
 param(
-    [Parameter(Mandatory = $false)]
-    [string]$DatabaseUrl,
-
     [string]$AdminUsername = "admin",
 
     [string]$AdminPassword = "password@12345"
@@ -9,12 +6,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-if (-not $DatabaseUrl) {
-    $DatabaseUrl = Read-Host "PostgreSQL/Netlify Database URL"
+$DatabaseUrl = & npx netlify env:get NETLIFY_DATABASE_URL --context production --scope functions 2>$null
+
+if ($LASTEXITCODE -ne 0 -or -not $DatabaseUrl) {
+    throw "NETLIFY_DATABASE_URL is not available for the linked site's production functions. Attach/configure Netlify Database and make sure this variable is available to functions."
 }
 
+$DatabaseUrl = ($DatabaseUrl | Out-String).Trim()
 if ($DatabaseUrl -notmatch "^postgres(ql)?://") {
-    throw "DatabaseUrl must be a PostgreSQL connection string beginning with postgres:// or postgresql://"
+    throw "Netlify's NETLIFY_DATABASE_URL is not a valid PostgreSQL connection string."
 }
 
 if ($AdminPassword.Length -lt 12) {
@@ -26,11 +26,14 @@ $bytes = New-Object byte[] 48
 $jwtSecret = [Convert]::ToBase64String($bytes)
 
 Write-Host "Configuring Netlify environment variables..."
-npx netlify env:set NETLIFY_DATABASE_URL $DatabaseUrl --context all --scope runtime --secret --force
-npx netlify env:set JWT_SECRET $jwtSecret --context all --scope runtime --secret --force
-npx netlify env:set ADMIN_USERNAME $AdminUsername --context all --scope runtime --force
-npx netlify env:set ADMIN_PASSWORD $AdminPassword --context all --scope runtime --secret --force
-npx netlify env:set ORG_TIMEZONE "Africa/Accra" --context all --scope runtime --force
+npx netlify env:set JWT_SECRET $jwtSecret --scope runtime --secret --force
+if ($LASTEXITCODE -ne 0) { throw "Failed to set JWT_SECRET in Netlify." }
+npx netlify env:set ADMIN_USERNAME $AdminUsername --scope runtime --force
+if ($LASTEXITCODE -ne 0) { throw "Failed to set ADMIN_USERNAME in Netlify." }
+npx netlify env:set ADMIN_PASSWORD $AdminPassword --scope runtime --secret --force
+if ($LASTEXITCODE -ne 0) { throw "Failed to set ADMIN_PASSWORD in Netlify." }
+npx netlify env:set ORG_TIMEZONE "Africa/Accra" --scope runtime --force
+if ($LASTEXITCODE -ne 0) { throw "Failed to set ORG_TIMEZONE in Netlify." }
 
 Write-Host "Running RAMS migrations and creating the first administrator..."
 $env:NETLIFY_DATABASE_URL = $DatabaseUrl
@@ -39,5 +42,6 @@ $env:ADMIN_USERNAME = $AdminUsername
 $env:ADMIN_PASSWORD = $AdminPassword
 $env:ORG_TIMEZONE = "Africa/Accra"
 npm run migrate
+if ($LASTEXITCODE -ne 0) { throw "RAMS database migration failed." }
 
 Write-Host "Database setup complete. Deploy the site to apply the runtime configuration."

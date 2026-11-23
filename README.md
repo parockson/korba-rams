@@ -25,19 +25,19 @@ Local: `npm install && npx netlify dev`.
 Statuses Pending/In Progress/Completed (editable); auditors may submit; issue description optional; external follow-up contacts allowed; assignment permission configurable (officers and auditors by default); duplicate file rows rejected; one file per batch; no notifications.
 
 ## Database setup
-Create a PostgreSQL database in Netlify Database or another PostgreSQL provider, then configure and migrate it:
+Provision Netlify Database for the site and make sure its `NETLIFY_DATABASE_URL` is available to production functions. Link this repository to the site with the Netlify CLI, then configure the app's environment variables and run the RAMS migrations:
 
 ```powershell
 npm run setup:db
 ```
 
-The setup script prompts for the PostgreSQL connection string. To provide it non-interactively:
+The script reads `NETLIFY_DATABASE_URL` from the linked site's production environment, sets `JWT_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `ORG_TIMEZONE`, then applies migrations and seeds the first administrator. It does not create or provision the Netlify database.
+
+To override the initial administrator credentials:
 
 ```powershell
-npm run setup:db -- -DatabaseUrl "postgresql://..." -AdminUsername "admin" -AdminPassword "password@12345"
+npm run setup:db -- -AdminUsername "admin" -AdminPassword "use-a-strong-password"
 ```
-
-The script creates Netlify environment variables, creates the RAMS tables and seeds the first administrator. It does not create the PostgreSQL account or database itself.
 
 ## Tests
 `npm test` (validation rules, role/permission invariants).
