@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "migrate": "tsx netlify/lib/migrate-cli.ts",
+    "setup:db": "powershell -ExecutionPolicy Bypass -File scripts/setup-db.ps1",
     "dev:web": "vite"
   },
   "dependencies": {

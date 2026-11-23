@@ -24,5 +24,20 @@ Local: `npm install && npx netlify dev`.
 ## Decisions taken where the SRS left options (SRS §19)
 Statuses Pending/In Progress/Completed (editable); auditors may submit; issue description optional; external follow-up contacts allowed; assignment permission configurable (officers and auditors by default); duplicate file rows rejected; one file per batch; no notifications.
 
+## Database setup
+Create a PostgreSQL database in Netlify Database or another PostgreSQL provider, then configure and migrate it:
+
+```powershell
+npm run setup:db
+```
+
+The setup script prompts for the PostgreSQL connection string. To provide it non-interactively:
+
+```powershell
+npm run setup:db -- -DatabaseUrl "postgresql://..." -AdminUsername "admin" -AdminPassword "password@12345"
+```
+
+The script creates Netlify environment variables, creates the RAMS tables and seeds the first administrator. It does not create the PostgreSQL account or database itself.
+
 ## Tests
 `npm test` (validation rules, role/permission invariants).
