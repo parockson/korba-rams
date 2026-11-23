@@ -1,0 +1,36 @@
+{
+  "name": "rams",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Reconciliation Audit Monitoring System (RAMS)",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "migrate": "tsx netlify/lib/migrate-cli.ts",
+    "dev:web": "vite"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
+    "@netlify/blobs": "^8.1.0",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^2.8.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.9.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "netlify-cli": "^17.38.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}
