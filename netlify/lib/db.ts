@@ -5,11 +5,11 @@ let client: any;
 
 function getClient() {
   if (!client) {
-    const url = process.env.NETLIFY_DATABASE_URL || process.env.DATABASE_URL;
+    const url = process.env.NETLIFY_DB_URL || process.env.NETLIFY_DATABASE_URL || process.env.DATABASE_URL;
     if (!url) {
       throw new HttpError(
         500,
-        "The database is not configured. Provision Netlify Database (or set NETLIFY_DATABASE_URL) and redeploy.",
+        "The database is not configured. Initialize Netlify Database and redeploy, or set NETLIFY_DB_URL.",
       );
     }
     client = neon(url);
