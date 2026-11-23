@@ -6,13 +6,16 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$DatabaseUrl = & npx netlify env:get NETLIFY_DATABASE_URL --context production --scope functions 2>$null
-
-if ($LASTEXITCODE -ne 0 -or -not $DatabaseUrl) {
-    throw "NETLIFY_DATABASE_URL is not available for the linked site's production functions. Attach/configure Netlify Database and make sure this variable is available to functions."
+$DatabaseUrlOutput = & npx netlify env:get NETLIFY_DATABASE_URL --context production --scope functions 2>$null
+if ($LASTEXITCODE -ne 0) {
+    throw "Could not read the linked site's production environment. Run 'netlify link' and sign in first."
 }
 
-$DatabaseUrl = ($DatabaseUrl | Out-String).Trim()
+$DatabaseUrl = ($DatabaseUrlOutput | Out-String).Trim()
+if (-not $DatabaseUrl -or $DatabaseUrl -match "^No value set\b") {
+    throw "NETLIFY_DATABASE_URL is not set for the linked site's production functions. Provision/connect Netlify Database, then add its connection URL as a production function environment variable."
+}
+
 if ($DatabaseUrl -notmatch "^postgres(ql)?://") {
     throw "Netlify's NETLIFY_DATABASE_URL is not a valid PostgreSQL connection string."
 }
